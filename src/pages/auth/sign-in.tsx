@@ -1,6 +1,7 @@
 import { Label } from '@radix-ui/react-label'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -22,8 +23,15 @@ export function SignIn() {
   } = useForm<SignInFormData>()
 
   async function handleSignIn(data: SignInFormData) {
-    console.log(data)
-    await new Promise((resolver) => setTimeout(resolver, 2000))
+    try {
+      console.log(data)
+      await new Promise((resolver) => setTimeout(resolver, 2000))
+      throw new Error('Algo deu errado. Tente novamente mais tarde.')
+      toast.success('Enviamos um link de verificação para o seu e-mail.')
+    } catch (error: any) {
+      console.log(error) 
+      toast.error(error.message)
+    }
   }
 
   return (
