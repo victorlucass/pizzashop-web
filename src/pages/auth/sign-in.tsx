@@ -1,6 +1,7 @@
 import { Label } from '@radix-ui/react-label'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -23,21 +24,17 @@ export function SignIn() {
   } = useForm<SignInFormData>()
 
   async function handleSignIn(data: SignInFormData) {
-    try {
-      console.log(data)
-      await new Promise((resolver) => setTimeout(resolver, 2000))
-      throw new Error('Algo deu errado. Tente novamente mais tarde.')
-      toast.success('Enviamos um link de verificação para o seu e-mail.')
-    } catch (error: any) {
-      console.log(error) 
-      toast.error(error.message)
-    }
+    toast.success('Login realizado com sucesso!')
+    return data
   }
 
   return (
     <>
       <Helmet title="Login" />
       <div className="p-8">
+        <Button asChild className="absolute right-8 top-8" variant="ghost">
+          <Link to="/sign-up">Novo estabelecimento</Link>
+        </Button>
         <div className="flex w-[350px] flex-col justify-center gap-6">
           <div className="flex flex-col gap-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tighter">
@@ -68,4 +65,5 @@ export function SignIn() {
   tracking-tighter: vai deixar a font um pouco mais grudada.
   register: vai registrar os dados/campos do formulário.
   handleSubmit: vai processar os dados do formulário.
+  hasChildren -> Button: ele vai transformar o elemento em um Slot, quer dizer, que todos os elementos do Button será incluídos no componente filho, por exemplo, o className.
 */
