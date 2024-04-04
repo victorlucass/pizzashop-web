@@ -1,10 +1,12 @@
 import { Label } from '@radix-ui/react-label'
+import { useMutation } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { signIn } from '@/api/sign-in'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -23,9 +25,24 @@ export function SignIn() {
     formState: { isSubmitting },
   } = useForm<SignInFormData>()
 
+  const { mutateAsync: authenticate } = useMutation({
+    mutationFn: signIn,
+  })
+
+  // mutateAsync -> vai executar a mutação e aguardar a resposta. No caso, o signIn
+
   async function handleSignIn(data: SignInFormData) {
-    toast.success('Login realizado com sucesso!')
-    return data
+    try {
+      await authenticate({ email: data.email })
+      toast.success('Enviamos um link de acesso para o seu e-mail!', {
+        action: {
+          label: 'Reenviar',
+          onClick: () => handleSignIn,
+        },
+      })
+    } catch {
+      toast.error('Ocorreu um erro inesperado')
+    }
   }
 
   return (
