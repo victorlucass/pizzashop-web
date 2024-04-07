@@ -1,10 +1,12 @@
 import { Label } from '@radix-ui/react-label'
+import { useMutation } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { restaurantRegister } from '@/api/restaurant-register'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -18,7 +20,6 @@ const signUpFormSchema = z.object({
 type SignUpFormData = z.infer<typeof signUpFormSchema>
 
 export function SignUp() {
-
   const navigate = useNavigate()
 
   const {
@@ -27,14 +28,22 @@ export function SignUp() {
     formState: { isSubmitting },
   } = useForm<SignUpFormData>()
 
+  const { mutateAsync: registerRestaurantFn } = useMutation({
+    mutationFn: restaurantRegister,
+  })
+
   async function handleSignUp(data: SignUpFormData) {
     try {
-      console.log(data)
-      await new Promise((promise) => setTimeout(promise, 2000))
+      await registerRestaurantFn({
+        restaurantName: data.restaurantName,
+        managerName: data.managerName,
+        email: data.email,
+        phone: data.phone,
+      })
       toast.success('Restaurante cadastrado com sucesso!', {
         action: {
           label: 'Login',
-          onClick: () => navigate('/sign-in'),
+          onClick: () => navigate(`/sign-in?email=${data.email}`),
         },
       })
     } catch (error: any) {
