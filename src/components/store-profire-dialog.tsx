@@ -26,7 +26,7 @@ import { Textarea } from './ui/textarea'
 
 const storeProfileFormSchema = z.object({
   name: z.string().min(3, { message: 'Nome inválido' }),
-  description: z.string(),
+  description: z.string().nullable(),
 })
 
 type StoreProfileFormData = z.infer<typeof storeProfileFormSchema>
@@ -53,22 +53,35 @@ export function StoreProfileDialog() {
     // não usei o defaultValues pois o values fica manitorando os valores.
   })
 
+  function updateManagedRestaurantCache({
+    name,
+    description,
+  }: StoreProfileFormData) {
+    const cached = queryClient.getQueryData<ManagerRestaurantProps>([
+      'managed-restaurant',
+    ])
+
+    if (cached) {
+      queryClient.setQueryData<ManagerRestaurantProps>(['managed-restaurant'], {
+        ...cached,
+        name,
+        description,
+      })
+    }
+
+    return { cached }
+  }
+
+  // Interface otimista: o que acontece quando a requisição é bem sucedida?
   const { mutateAsync: updateProfileFn } = useMutation({
     mutationFn: updateProfile,
-    onSuccess(_, { name, description }) {
-      const cached = queryClient.getQueryData<ManagerRestaurantProps>([
-        'managed-restaurant',
-      ])
-
-      if (cached) {
-        queryClient.setQueryData<ManagerRestaurantProps>(
-          ['managed-restaurant'],
-          {
-            ...cached,
-            name,
-            description,
-          },
-        )
+    onMutate({ name, description }) {
+      const { cached } = updateManagedRestaurantCache({ name, description })
+      return { previousProfile: cached }
+    },
+    onError(_, __, context) {
+      if (context?.previousProfile) {
+        updateManagedRestaurantCache(context.previousProfile)
       }
     },
   })
